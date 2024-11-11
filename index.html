@@ -1,0 +1,519 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>C99 API Wrapper</title>
+  <style>
+    :root {
+      --background: #1E1E2F;
+      --form-bg: #282A36;
+      --text: #F8F8F2;
+      --primary: #6272A4;
+      --accent: #FF79C6;
+      --button-bg: #44475A;
+      --button-hover: #6272A4;
+    }
+
+    body {
+      font-family: 'Arial', sans-serif;
+      background-color: var(--background);
+      color: var(--text);
+      margin: 10px;
+    }
+
+    .form-group {
+      margin-bottom: 15px;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 5px;
+      font-weight: bold;
+    }
+
+    input, select, button {
+      width: 100%;
+      padding: 10px;
+      margin-top: 5px;
+      background-color: var(--form-bg);
+      color: var(--text);
+      border: none;
+      border-radius: 5px;
+    }
+
+    button {
+      background-color: var(--button-bg);
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: var(--button-hover);
+    }
+
+    #result-output {
+      white-space: pre-wrap;
+      background-color: var(--form-bg);
+      padding: 10px;
+      border-radius: 5px;
+      margin-top: 15px;
+      overflow: auto;
+    }
+
+    img {
+      max-width: 150px;
+      display: block;
+      margin: 20px auto;
+    }
+
+    @media (max-width: 768px) {
+      input, select, button {
+        font-size: 14px;
+      }
+    }
+  </style>
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+</head>
+<body>
+  <img src="your-logo-url.png" alt="NatSec Logo" id="logo" /> <!-- Place your logo here -->
+
+  <h1>C99 API Wrapper</h1>
+
+  <div class="form-group">
+    <label for="api-key">API Key:</label>
+    <input type="text" id="api-key" placeholder="Enter your API key" />
+    <button id="save-api-key">Save API Key</button>
+  </div>
+
+  <h2>Available Methods</h2>
+
+  <div class="form-group">
+    <label for="endpoint">Select Endpoint:</label>
+    <select id="endpoint">
+      <!-- Added all endpoints -->
+      <option value="getSubDomains">getSubDomains</option>
+      <option value="getPhoneInfo">getPhoneInfo</option>
+      <option value="getSkypeUserInfo">getSkypeUserInfo</option>
+      <option value="getSkypeIPInfo">getSkypeIPInfo</option>
+      <option value="FirewallResolver">FirewallResolver</option>
+      <option value="PortScanner">PortScanner</option>
+      <option value="CheckPort">CheckPort</option>
+      <option value="Ping">Ping</option>
+      <option value="HostnameResolver">HostnameResolver</option>
+      <option value="dnschecker">dnschecker</option>
+      <option value="HostToIP">HostToIP</option>
+      <option value="IPToDomains">IPToDomains</option>
+      <option value="AlexaRank">AlexaRank</option>
+      <option value="WhoisChecker">WhoisChecker</option>
+      <option value="ScreenshotTool">ScreenshotTool</option>
+      <option value="GeoIP">GeoIP</option>
+      <option value="WebsiteUpOrDownChecker">WebsiteUpOrDownChecker</option>
+      <option value="SiteReputationChecker">SiteReputationChecker</option>
+      <option value="GetWebsiteHeaders">GetWebsiteHeaders</option>
+      <option value="LinkBackup">LinkBackup</option>
+      <option value="URLShortener">URLShortener</option>
+      <option value="RandomStringPicker">RandomStringPicker</option>
+      <option value="Dictionary">Dictionary</option>
+      <option value="ImageReverse">ImageReverse</option>
+      <option value="SynonymFinder">SynonymFinder</option>
+      <option value="EmailValidator">EmailValidator</option>
+      <option value="DisposableMailCheck">DisposableMailCheck</option>
+      <option value="IPValidator">IPValidator</option>
+      <option value="TORChecker">TORChecker</option>
+      <option value="Translator">Translator</option>
+      <option value="RandomInfoGenerator">RandomInfoGenerator</option>
+      <option value="YouTubeVideoDetails">YouTubeVideoDetails</option>
+      <option value="YouTubeToMP3">YouTubeToMP3</option>
+      <option value="IPLogger">IPLogger</option>
+      <option value="BitcoinBalance">BitcoinBalance</option>
+      <option value="EthereumBalance">EthereumBalance</option>
+      <option value="CurrencyConverter">CurrencyConverter</option>
+      <option value="CurrencyRates">CurrencyRates</option>
+      <option value="WeatherChecker">WeatherChecker</option>
+      <option value="QRCodeGenerator">QRCodeGenerator</option>
+      <option value="TextParser">TextParser</option>
+      <option value="ProxyDetector">ProxyDetector</option>
+      <option value="PasswordGenerator">PasswordGenerator</option>
+      <option value="RandomNumberGenerator">RandomNumberGenerator</option>
+      <option value="LicenseKeyGenerator">LicenseKeyGenerator</option>
+      <option value="EitherOr">EitherOr</option>
+      <option value="GIFFinder">GIFFinder</option>
+    </select>
+  </div>
+
+  <div id="dynamic-form"></div>
+
+  <div class="form-group">
+    <label for="json-option">
+      <input type="checkbox" id="json-option" checked> Include JSON response
+    </label>
+  </div>
+
+  <div class="form-group">
+    <button id="run-api-call">Run API Call</button>
+  </div>
+
+  <div id="result-output" style="display:none;"></div>
+
+  <script>
+    class c99 {
+      constructor(apikey) {
+        this.key = apikey;
+      }
+
+      async makeRequest(endpoint, params, includeJson = true) {
+        params.key = this.key;
+        if (includeJson) {
+          params.json = 1; // JSON is optional now
+        }
+
+        let response = await axios.get(`https://api.c99.nl/${endpoint}`, {
+          params: params,
+          paramsSerializer: params => {
+            // Prevent encoding the '+' character in phone numbers
+            return Object.keys(params).map(key => `${key}=${params[key]}`).join('&');
+          }
+        });
+        return response.data;
+      }
+
+      async getSubDomains(domain, includeJson) {
+        return this.makeRequest('subdomainfinder', { domain }, includeJson);
+      }
+
+      async getPhoneInfo(number, includeJson) {
+        return this.makeRequest('phonelookup', { number }, includeJson);
+      }
+
+      async getSkypeUserInfo(username, includeJson) {
+        return this.makeRequest('skyperesolver', { username }, includeJson);
+      }
+
+      async getSkypeIPInfo(ip, includeJson) {
+        return this.makeRequest('ip2skype', { ip }, includeJson);
+      }
+
+      async FirewallResolver(domain, includeJson) {
+        return this.makeRequest('firewalldetector', { url: domain }, includeJson);
+      }
+
+      async PortScanner(ip, includeJson) {
+        return this.makeRequest('portscanner', { host: ip }, includeJson);
+      }
+
+      async CheckPort(host, port, includeJson) {
+        return this.makeRequest('portscanner', { host, port }, includeJson);
+      }
+
+      async Ping(ip, includeJson) {
+        return this.makeRequest('ping', { host: ip }, includeJson);
+      }
+
+      async HostnameResolver(ip, includeJson) {
+        return this.makeRequest('gethostname', { host: ip }, includeJson);
+      }
+
+      async dnschecker(domain, includeJson) {
+        return this.makeRequest('dnschecker', { url: domain }, includeJson);
+      }
+
+      async HostToIP(host, includeJson) {
+        return this.makeRequest('dnsresolver', { host, server: 'US' }, includeJson);
+      }
+
+      async IPToDomains(ip, includeJson) {
+        return this.makeRequest('ip2domains', { ip }, includeJson);
+      }
+
+      async AlexaRank(url, includeJson) {
+        return this.makeRequest('alexarank', { url }, includeJson);
+      }
+
+      async WhoisChecker(domain, includeJson) {
+        return this.makeRequest('whois', { domain }, includeJson);
+      }
+
+      async ScreenshotTool(url, includeJson) {
+        return this.makeRequest('createscreenshot', { url }, includeJson);
+      }
+
+      async GeoIP(ip, includeJson) {
+        return this.makeRequest('geoip', { host: ip }, includeJson);
+      }
+
+      async WebsiteUpOrDownChecker(url, includeJson) {
+        return this.makeRequest('websiteup', { url }, includeJson);
+      }
+
+      async SiteReputationChecker(url, includeJson) {
+        return this.makeRequest('sitereputation', { url }, includeJson);
+      }
+
+      async GetWebsiteHeaders(url, includeJson) {
+        return this.makeRequest('getheaders', { url }, includeJson);
+      }
+
+      async LinkBackup(url, includeJson) {
+        return this.makeRequest('linkbackup', { url }, includeJson);
+      }
+
+      async URLShortener(url, includeJson) {
+        return this.makeRequest('urlshortener', { url }, includeJson);
+      }
+
+      async RandomStringPicker(string, includeJson) {
+        return this.makeRequest('randomstringpicker', { string }, includeJson);
+      }
+
+      async Dictionary(word, includeJson) {
+        return this.makeRequest('dictionary', { word }, includeJson);
+      }
+
+      async ImageReverse(url, includeJson) {
+        return this.makeRequest('imagereverse', { url }, includeJson);
+      }
+
+      async SynonymFinder(word, includeJson) {
+        return this.makeRequest('synonymfinder', { word }, includeJson);
+      }
+
+      async EmailValidator(email, includeJson) {
+        return this.makeRequest('emailvalidator', { email }, includeJson);
+      }
+
+      async DisposableMailCheck(email, includeJson) {
+        return this.makeRequest('disposablemailchecker', { email }, includeJson);
+      }
+
+      async IPValidator(ip, includeJson) {
+        return this.makeRequest('ipvalidator', { ip }, includeJson);
+      }
+
+      async TORChecker(ip, includeJson) {
+        return this.makeRequest('torchecker', { ip }, includeJson);
+      }
+
+      async Translator(text, from, to, includeJson) {
+        return this.makeRequest('translator', { text, from, to }, includeJson);
+      }
+
+      async RandomInfoGenerator(includeJson) {
+        return this.makeRequest('randomperson', {}, includeJson);
+      }
+
+      async YouTubeVideoDetails(url, includeJson) {
+        return this.makeRequest('youtubedetails', { url }, includeJson);
+      }
+
+      async YouTubeToMP3(url, includeJson) {
+        return this.makeRequest('youtubemp3', { url }, includeJson);
+      }
+
+      async IPLogger(includeJson) {
+        return this.makeRequest('iplogger', {}, includeJson);
+      }
+
+      async BitcoinBalance(address, includeJson) {
+        return this.makeRequest('bitcoinbalance', { address }, includeJson);
+      }
+
+      async EthereumBalance(address, includeJson) {
+        return this.makeRequest('ethereumbalance', { address }, includeJson);
+      }
+
+      async CurrencyConverter(amount, from, to, includeJson) {
+        return this.makeRequest('currencyconverter', { amount, from, to }, includeJson);
+      }
+
+      async CurrencyRates(currency, includeJson) {
+        return this.makeRequest('currencyrates', { currency }, includeJson);
+      }
+
+      async WeatherChecker(location, includeJson) {
+        return this.makeRequest('weather', { location }, includeJson);
+      }
+
+      async QRCodeGenerator(string, includeJson) {
+        return this.makeRequest('qrcodegenerator', { string }, includeJson);
+      }
+
+      async TextParser(text, includeJson) {
+        return this.makeRequest('textparser', { text }, includeJson);
+      }
+
+      async ProxyDetector(ip, includeJson) {
+        return this.makeRequest('proxydetector', { ip }, includeJson);
+      }
+
+      async PasswordGenerator(length, includeJson) {
+        return this.makeRequest('passwordgenerator', { length }, includeJson);
+      }
+
+      async RandomNumberGenerator(min, max, includeJson) {
+        return this.makeRequest('randomnumbergenerator', { min, max }, includeJson);
+      }
+
+      async LicenseKeyGenerator(format, includeJson) {
+        return this.makeRequest('licensekeygenerator', { format }, includeJson);
+      }
+
+      async EitherOr(option1, option2, includeJson) {
+        return this.makeRequest('eitheror', { option1, option2 }, includeJson);
+      }
+
+      async GIFFinder(search, includeJson) {
+        return this.makeRequest('giffinder', { search }, includeJson);
+      }
+
+      // Add other methods here as needed
+    }
+
+    let apiKey = '';
+    let c99Instance = null;
+
+    document.getElementById('save-api-key').addEventListener('click', () => {
+      apiKey = document.getElementById('api-key').value.trim();
+      c99Instance = new c99(apiKey);
+      alert('API Key saved!');
+    });
+
+    document.getElementById('endpoint').addEventListener('change', generateForm);
+
+    function generateForm() {
+      const selectedEndpoint = document.getElementById('endpoint').value;
+      const formContainer = document.getElementById('dynamic-form');
+      formContainer.innerHTML = ''; // Reset
+
+      let formHtml = '';
+      switch (selectedEndpoint) {
+        case 'getSubDomains':
+          formHtml = `<div class="form-group"><label for="domain">Domain:</label><input type="text" id="domain" placeholder="Enter domain" /></div>`;
+          break;
+        case 'getPhoneInfo':
+          formHtml = `<div class="form-group"><label for="number">Phone Number:</label><input type="text" id="number" placeholder="Enter phone number" /></div>`;
+          break;
+        case 'getSkypeUserInfo':
+          formHtml = `<div class="form-group"><label for="username">Username:</label><input type="text" id="username" placeholder="Enter Skype username" /></div>`;
+          break;
+        case 'getSkypeIPInfo':
+          formHtml = `<div class="form-group"><label for="ip">IP Address:</label><input type="text" id="ip" placeholder="Enter IP address" /></div>`;
+          break;
+        case 'GeoIP':
+          formHtml = `<div class="form-group"><label for="ip">IP Address:</label><input type="text" id="ip" placeholder="Enter IP address" /></div>`;
+          break;
+        case 'WebsiteUpOrDownChecker':
+        case 'SiteReputationChecker':
+        case 'GetWebsiteHeaders':
+        case 'LinkBackup':
+        case 'URLShortener':
+        case 'ImageReverse':
+        case 'ScreenshotTool':
+          formHtml = `<div class="form-group"><label for="url">URL:</label><input type="text" id="url" placeholder="Enter URL" /></div>`;
+          break;
+        case 'RandomStringPicker':
+          formHtml = `<div class="form-group"><label for="string">String:</label><input type="text" id="string" placeholder="Enter string with choices separated by commas" /></div>`;
+          break;
+        case 'Dictionary':
+        case 'SynonymFinder':
+          formHtml = `<div class="form-group"><label for="word">Word:</label><input type="text" id="word" placeholder="Enter word" /></div>`;
+          break;
+        case 'EmailValidator':
+        case 'DisposableMailCheck':
+          formHtml = `<div class="form-group"><label for="email">Email:</label><input type="email" id="email" placeholder="Enter email address" /></div>`;
+          break;
+        case 'IPValidator':
+        case 'TORChecker':
+        case 'ProxyDetector':
+          formHtml = `<div class="form-group"><label for="ip">IP Address:</label><input type="text" id="ip" placeholder="Enter IP address" /></div>`;
+          break;
+        case 'Translator':
+          formHtml = `
+            <div class="form-group"><label for="text">Text:</label><input type="text" id="text" placeholder="Enter text to translate" /></div>
+            <div class="form-group"><label for="from">From Language:</label><input type="text" id="from" placeholder="Enter source language code" /></div>
+            <div class="form-group"><label for="to">To Language:</label><input type="text" id="to" placeholder="Enter target language code" /></div>
+          `;
+          break;
+        case 'YouTubeVideoDetails':
+        case 'YouTubeToMP3':
+          formHtml = `<div class="form-group"><label for="url">YouTube URL:</label><input type="text" id="url" placeholder="Enter YouTube URL" /></div>`;
+          break;
+        case 'BitcoinBalance':
+        case 'EthereumBalance':
+          formHtml = `<div class="form-group"><label for="address">Wallet Address:</label><input type="text" id="address" placeholder="Enter wallet address" /></div>`;
+          break;
+        case 'CurrencyConverter':
+          formHtml = `
+            <div class="form-group"><label for="amount">Amount:</label><input type="number" id="amount" placeholder="Enter amount" /></div>
+            <div class="form-group"><label for="from">From Currency:</label><input type="text" id="from" placeholder="Enter source currency code" /></div>
+            <div class="form-group"><label for="to">To Currency:</label><input type="text" id="to" placeholder="Enter target currency code" /></div>
+          `;
+          break;
+        case 'CurrencyRates':
+          formHtml = `<div class="form-group"><label for="currency">Currency:</label><input type="text" id="currency" placeholder="Enter currency code" /></div>`;
+          break;
+        case 'WeatherChecker':
+          formHtml = `<div class="form-group"><label for="location">Location:</label><input type="text" id="location" placeholder="Enter location" /></div>`;
+          break;
+        case 'QRCodeGenerator':
+        case 'TextParser':
+          formHtml = `<div class="form-group"><label for="string">Text:</label><input type="text" id="string" placeholder="Enter text" /></div>`;
+          break;
+        case 'PasswordGenerator':
+          formHtml = `<div class="form-group"><label for="length">Length:</label><input type="number" id="length" placeholder="Enter password length" /></div>`;
+          break;
+        case 'RandomNumberGenerator':
+          formHtml = `
+            <div class="form-group"><label for="min">Minimum:</label><input type="number" id="min" placeholder="Enter minimum value" /></div>
+            <div class="form-group"><label for="max">Maximum:</label><input type="number" id="max" placeholder="Enter maximum value" /></div>
+          `;
+          break;
+        case 'LicenseKeyGenerator':
+          formHtml = `<div class="form-group"><label for="format">Format:</label><input type="text" id="format" placeholder="Enter license key format" /></div>`;
+          break;
+        case 'EitherOr':
+          formHtml = `
+            <div class="form-group"><label for="option1">Option 1:</label><input type="text" id="option1" placeholder="Enter first option" /></div>
+            <div class="form-group"><label for="option2">Option 2:</label><input type="text" id="option2" placeholder="Enter second option" /></div>
+          `;
+          break;
+        case 'GIFFinder':
+          formHtml = `<div class="form-group"><label for="search">Search:</label><input type="text" id="search" placeholder="Enter search term" /></div>`;
+          break;
+        case 'RandomInfoGenerator':
+        case 'IPLogger':
+          formHtml = ''; // These endpoints don't require any parameters
+          break;
+      }
+
+      formContainer.innerHTML = formHtml;
+    }
+
+    document.getElementById('run-api-call').addEventListener('click', async () => {
+      if (!c99Instance) {
+        alert('Please save the API key first.');
+        return;
+      }
+
+      const endpoint = document.getElementById('endpoint').value;
+      const params = {};
+      const inputs = document.querySelectorAll('#dynamic-form input');
+      const includeJson = document.getElementById('json-option').checked;
+      
+      inputs.forEach(input => {
+        params[input.id] = input.value.trim();
+      });
+
+      const resultOutput = document.getElementById('result-output');
+
+      try {
+        const data = await c99Instance[endpoint](...Object.values(params), includeJson);
+        resultOutput.style.display = 'block';
+        resultOutput.textContent = JSON.stringify(data, null, 2);
+      } catch (error) {
+        resultOutput.style.display = 'block';
+        resultOutput.textContent = `Error: ${error.message}`;
+      }
+    });
+  </script>
+</body>
+</html>
